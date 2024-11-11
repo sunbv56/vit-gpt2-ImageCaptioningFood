@@ -3,7 +3,9 @@
 
 # ViT-GPT2 for Image Captioning (Food)
 
-This project implements an image captioning model using a combination of Vision Transformer (ViT) and GPT-2. The model generates captions for food images using a dataset collected from BBC Good Food. The project includes the code for fine-tuning the ViT-GPT2 model and a web interface to deploy the image captioning system. The model was fine-tuned using a GPU environment, and the trained model is available for public use.
+This project implements an image captioning model using a combination of Vision Transformer (ViT) and GPT-2. The model generates captions for food images using a dataset collected from BBC Good Food. The project includes the code for fine-tuning the ViT-GPT2 model and a web interface to deploy the image captioning system. The model was fine-tuned using a GPU environment, and the trained model is available for public use on Hugging Face.
+
+You can access the model on Hugging Face here: [ViT-GPT2 Image Captioning Food](https://huggingface.co/sunbv56/vit-gpt2-imagecaptioningfood)
 
 ## Project Description
 
