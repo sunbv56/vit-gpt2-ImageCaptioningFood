@@ -74,7 +74,7 @@ This project has two primary components:
 
 2. **Run the entire notebook** to train the model:
    - This includes data preprocessing, model training, and evaluation.
-   - After training, the model will be saved and uploaded to Hugging Face.
+   - After training, the model will be saved.
 
 ## Deploying the Web Interface
 
