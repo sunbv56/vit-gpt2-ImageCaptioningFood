@@ -1,0 +1,13 @@
+sacrebleu
+transformers==4.20.1
+datasets
+requests
+seaborn
+numpy
+pandas
+Pillow
+tqdm
+matplotlib
+scikit-learn
+torch
+torchvision
