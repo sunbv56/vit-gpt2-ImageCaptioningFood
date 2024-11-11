@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Captioning Client</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron&family=Poppins:wght@400;600&display=swap');
+
+        /* Global styles */
+        body {
+            background-color: #eef2f7;
+            color: #333;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            color: #007bff;
+            text-align: center;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 50px;
+        }
+
+        /* Drop zone styles */
+        #dropZone {
+            width: 100%;
+            height: 200px;
+            font-size: 1.5rem;
+            border: 3px dashed #ccc;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            background-color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        #dropZone:hover {
+            border-color: #007bff;
+            color: #007bff;
+            background-color: #f0f8ff;
+        }
+
+        #dropZone.dragover {
+            border-color: #007bff;
+            color: #007bff;
+        }
+
+        /* Image display */
+        #imageDisplay {
+            max-width: 100%;
+            object-fit: cover;
+            display: none;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Result section */
+        #result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        #caption {
+            margin-top: 20px;
+            font-size: 1.8rem;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Progress bar */
+        .range {
+            position: relative;
+            background-color: #333;
+            width: 100%;
+            max-width: 300px;
+            height: 35px;
+            transform: skew(30deg);
+            font-family: 'Orbitron', monospace;
+            margin-top: 20px;
+            display: none;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .range:before {
+            --width: calc(var(--p) * 1%);
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background-color: #f3e600;
+            z-index: 0;
+            animation: load 0.5s forwards linear, glitch 2s infinite linear;
+        }
+
+        .range:after {
+            counter-reset: progress var(--p);
+            content: counter(progress) '%';
+            color: #000;
+            position: absolute;
+            left: 15%;
+            top: 50%;
+            transform: translateY(-50%) skewX(-30deg);
+            z-index: 1;
+        }
+
+        .range__label {
+            transform: skew(-30deg);
+            line-height: 1.5;
+            color: #fff;
+            margin-top: -20px;
+        }
+
+        @keyframes load {
+            to {
+                width: var(--width);
+            }
+        }
+
+        @keyframes glitch {
+            0%, 5% { transform: translate(0, 0); }
+            1% { transform: translate(-5%, -10%); }
+            2% { transform: translate(10%, 30%); }
+            3% { transform: translate(-43%, 10%); }
+            4% { transform: translate(2%, -23%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Image Captioning Food</h1>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div id="dropZone" class="p-3">
+                    Drag & Drop Image Here or Click to Select
+                </div>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div id="result">
+                    <img id="imageDisplay" src="" alt="Selected Image"/>
+                    <p id="caption" class="text-center text-muted"></p>
+                    <div class="range" id="progressBar" style="--p:0">
+                        <div class="range__label">Generating Caption</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const imageInput = document.getElementById('imageInput');
+        const imageDisplay = document.getElementById('imageDisplay');
+        const caption = document.getElementById('caption');
+        const progressBar = document.getElementById('progressBar');
+
+        function adjustImageSize() {
+            const screenHeight = window.innerHeight;
+            const screenWidth = window.innerWidth;
+            const maxDimension = Math.max(screenHeight, screenWidth);
+            imageHeight = maxDimension
+            if (screenHeight==maxDimension){
+                imageHeight = (imageHeight * 0.4)
+            }else if(screenWidth < 1300){
+                imageHeight = (imageHeight * 0.3)
+            }else{
+                imageHeight = (imageHeight * 0.2)
+            }
+            imageDisplay.style.height = `${imageHeight}px`;
+        }
+
+        dropZone.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                imageInput.files = files;
+                previewImage(files[0]);
+                uploadImage(files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', () => {
+            if (imageInput.files.length > 0) {
+                previewImage(imageInput.files[0]);
+                uploadImage(imageInput.files[0]);
+            }
+        });
+
+        function previewImage(file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                imageDisplay.src = reader.result;
+                imageDisplay.style.display = 'block';
+                caption.style.display = 'none';
+                adjustImageSize(); // Adjust image size after loading
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function uploadImage(file) {
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                const base64Image = reader.result.split(',')[1];
+
+                // Show progress bar and start animation
+                progressBar.style.display = 'block';
+                progressBar.style.setProperty('--p', 0);
+
+                let progress = 0;
+                const interval = setInterval(() => {
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                    } else {
+                        progress += 10;
+                        progressBar.style.setProperty('--p', progress);
+                    }
+                }, 100);
+
+                fetch('http://localhost:5000/generate-caption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ image: base64Image })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(interval);
+                    progressBar.style.setProperty('--p', 100);
+
+                    setTimeout(() => {
+                        progressBar.style.display = 'none';
+                        caption.style.display = 'block';
+                        caption.innerText = data.generated_caption;
+                        caption.classList.remove('text-muted');
+                        caption.classList.add('text-primary');
+                    }, 500);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to generate caption.');
+                    caption.innerText = '';
+                    clearInterval(interval);
+                    progressBar.style.display = 'none';
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
